@@ -1,7 +1,7 @@
 /* FCE Ultra - NES/Famicom Emulator
  *
  * Copyright notice for this file:
- *  Copyright (C) 2002 Ben Parnell
+ *  Copyright (C) 2002 Ben Parnell, Jay Oster
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -255,7 +255,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
                         break;
                  }
 
-                }                
+                }
                 break;
 
    case WM_VKEYTOITEM:
@@ -264,7 +264,7 @@ BOOL CALLBACK CheatConsoleCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM l
 
 				real=SendDlgItemMessage(hwndDlg,106,LB_GETCURSEL,0,0);
 				switch (LOWORD(wParam)) {
-                  case VK_UP: 
+                  case VK_UP:
 						// mmmm....recursive goodness
 						if (real == 0) SendMessage(hwndDlg,WM_VSCROLL,SB_LINEUP,0);
 						return -1;
