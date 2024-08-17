@@ -29,6 +29,9 @@
 
 
 extern int DbgPosX,DbgPosY;
+extern int ChtPosX,ChtPosY;
+extern int PPUViewPosX,PPUViewPosY;
+extern int PPUViewRefresh;
 
 static CFGSTRUCT fceuconfig[]={
 
@@ -110,6 +113,13 @@ static CFGSTRUCT fceuconfig[]={
         AC(WinPosY),
         AC(DbgPosX),
         AC(DbgPosY),
+        AC(ChtPosX),
+        AC(ChtPosY),
+        AC(PPUViewPosX),
+        AC(PPUViewPosY),
+
+        AC(PPUViewRefresh),
+        AC(CheatStyle),
 
         ENDCFGSTRUCT
 };

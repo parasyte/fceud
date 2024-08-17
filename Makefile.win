@@ -7,12 +7,13 @@ all:		fceu
 include zlib/Makefile
 
 LDRIVER = -mwindows -lddraw -ldinput -ldsound -lgdi32 -ldxguid -lwinmm -lshell32 -lwsock32 -lcomdlg32 -lole32
-OBJDRIVER	= ${B}main.o ${B}input.o ${B}joystick.o ${B}keyboard.o ${B}cheat.o ${B}debugger.o ${B}res.o ${ZLIBOBJS} ${UNZIPOBJS} drivers/common/config.o
+OBJDRIVER	= ${B}main.o ${B}input.o ${B}joystick.o ${B}keyboard.o ${B}cheat.o ${B}debugger.o ${B}ppuview.o ${B}res.o ${ZLIBOBJS} ${UNZIPOBJS} drivers/common/config.o
 
 include Makefile.base
 
 ${B}main.o:		${B}main.c ${B}netplay.c ${B}config.c ${B}throttle.c ${B}video.c ${B}window.c ${B}sound.c ${B}wave.c version.h debugger.h
-${B}debugger.o:         ${B}common.h debugger.h ${B}dasm.h
+${B}debugger.o:         ${B}common.h ${B}dasm.h debugger.h fce.h nsf.h
+${B}ppuview.o:		${B}common.h ppuview.h debugger.h svga.h
 ${B}cheat.o:		${B}common.h ${B}cheat.h
 ${B}input.o:		${B}common.h ${B}input.h ${B}joystick.h ${B}keyboard.h
 ${B}joystick.o:		${B}common.h ${B}joystick.h ${B}input.h

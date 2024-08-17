@@ -28,7 +28,7 @@ int step,stepout,jsrcount;
 int childwnd,numWPs;
 
 void DoDebug(uint8 halt);
-void KillDebugger(void);
+void KillDebugger();
 uint8 GetMem(uint16 A);
 uint8 GetPPUMem(uint8 A);
 

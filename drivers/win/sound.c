@@ -184,6 +184,7 @@ void FCEUD_WriteSoundData(int32 *Buffer, int Count)
    writepos+=Count<<bittage;
   }
  nolock:
+ return;
  ///////// Ending
 }
 
@@ -450,8 +451,7 @@ void ConfigSound(void)
 
 void StopSound(void)
 {
- if(soundo)
-  IDirectSoundBuffer_Stop(ppbufw);
+ if (soundo) IDirectSoundBuffer_Stop(ppbufw);
 }
 
 #include "wave.c"

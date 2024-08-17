@@ -399,6 +399,7 @@ void FCEUD_BlitScreen(uint8 *XBuf)
  if(!(eoptions&EO_BGRUN))
   while(nofocus)
   {
+   StopSound();
    Sleep(50);
    BlockingCheck();
   }

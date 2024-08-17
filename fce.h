@@ -1,3 +1,5 @@
+#include <string.h>
+
 #ifndef _FCEH
 extern int GameLoaded;
 void ResetGameLoaded(void);

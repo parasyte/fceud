@@ -131,6 +131,8 @@ void DestroyInput(void)
    KeyboardClose();
 }
 
+extern void GetMouseData(uint32 *x, uint32 *y, uint32 *b);
+
 void FCEUD_UpdateInput(void)
 {
   int x;

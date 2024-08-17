@@ -19,7 +19,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include        <string.h>
+//#include <string.h>
 #include	<stdio.h>
 #include	<stdlib.h>
 
@@ -519,6 +519,9 @@ static void PRefreshLine(void)
         }
 }
 
+
+//#define SCANCYCLE 1 //how many cycles execute per tile drawn?
+
 /*              Total of 33 tiles(32 + 1 extra) */
 static void FASTAPASS(1) RefreshLine(uint8 *target)
 {
@@ -554,6 +557,8 @@ static void FASTAPASS(1) RefreshLine(uint8 *target)
                 register uint8 cc,zz,zz2;
                 uint32 vadr;
 
+                //vofs=(vofs&0xEFFF)|((PPU[0]&0x10)<<8);
+                //X6502_Run(SCANCYCLE);
                 if((tochange<=0 && MMC5HackSPMode&0x40) || 
 		   (tochange>0 && !(MMC5HackSPMode&0x40)))
                 {
@@ -601,6 +606,8 @@ static void FASTAPASS(1) RefreshLine(uint8 *target)
                 register uint8 zz2;
                 uint32 vadr;
 
+                //vofs=(vofs&0xEFFF)|((PPU[0]&0x10)<<8);
+                //X6502_Run(SCANCYCLE);
                 if((tochange<=0 && MMC5HackSPMode&0x40) ||
                    (tochange>0 && !(MMC5HackSPMode&0x40)))
                 {
@@ -646,6 +653,8 @@ static void FASTAPASS(1) RefreshLine(uint8 *target)
                 uint32 vadr;  
 
                 C=MMC5HackVROMPTR;
+                //vofs=(vofs&0xEFFF)|((PPU[0]&0x10)<<8);
+                //X6502_Run(SCANCYCLE);
                 zz2=(RefreshAddr>>10)&3;
                 vadr = (vnapage[zz2][RefreshAddr & 0x3ff] << 4) + vofs;
                 C += (((MMC5HackExNTARAMPtr[RefreshAddr & 0x3ff]) & 0x3f & 
@@ -668,6 +677,8 @@ static void FASTAPASS(1) RefreshLine(uint8 *target)
                 register uint8 cc,zz,zz2;
                 uint32 vadr;
 
+                //vofs=(vofs&0xEFFF)|((PPU[0]&0x10)<<8);
+                //X6502_Run(SCANCYCLE);
                 zz=RefreshAddr&0x1F;
                 zz2=(RefreshAddr>>10)&3;
                 vadr=(vnapage[zz2][RefreshAddr&0x3ff]<<4)+vofs;
@@ -693,6 +704,10 @@ static void FASTAPASS(1) RefreshLine(uint8 *target)
                 register uint8 cc,zz,zz2;
                 uint32 vadr;  
 
+                //if (scanline == 57) { //((X1 == 31) && (scanline > 55) && (scanline < 83)) { //(!(X1&15)) {
+				//	X6502_Run(SCANCYCLE);
+                //	vofs=(vofs&0xEFFF)|((PPU[0]&0x10)<<8);
+				//}
                 zz=RefreshAddr&0x1F;
                 zz2=(RefreshAddr>>10)&3;
                 PPU_hook(0x2000|(RefreshAddr&0xFFF));
@@ -719,6 +734,10 @@ static void FASTAPASS(1) RefreshLine(uint8 *target)
                 register uint8 cc,zz,zz2;
                 uint32 vadr;
 
+                //if (scanline == 57) { //((X1 == 31) && (scanline > 55) && (scanline < 83)) { //(!(X1&15)) {
+				//	X6502_Run(SCANCYCLE);
+                //	vofs=(vofs&0xEFFF)|((PPU[0]&0x10)<<8);
+				//}
                 zz=RefreshAddr&0x1F;
 		zz2=(RefreshAddr>>10)&3;
                 vadr=(vnapage[zz2][RefreshAddr&0x3ff]<<4)+vofs;
@@ -1350,6 +1369,8 @@ int FCEUI_Initialize(void)
         return 1;
 }
 
+#include "ppuview.h"
+
 #define harko 0xe //0x9
 static INLINE void Thingo(void)
 {
@@ -1418,7 +1439,7 @@ void EmLoop(void)
      GameHBIRQHook();
 
    X6502_Run(85-kook);
-   kook=(kook+1)&1;
+   kook^=1; //kook=(kook+1)&1;
   }
 
   if(ScreenON || SpriteON)
@@ -1437,6 +1458,7 @@ void EmLoop(void)
    {
     deempcnt[deemp]++;
     Thingo();
+    if ((PPUViewer) && (scanline == PPUViewScanline)) UpdatePPUView(1);
    }
    for(x=1,max=0,maxref=0;x<7;x++)
    {

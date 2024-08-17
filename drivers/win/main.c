@@ -27,7 +27,6 @@
 #include <dsound.h>
 #include <dinput.h>
 #include <dir.h>
-#include <commctrl.h>
 #include <shlobj.h>     // For directories configuration dialog.
 
 #include "input.h"
@@ -35,6 +34,7 @@
 #include "keyboard.h"
 #include "cheat.h"
 #include "..\..\debugger.h"
+#include "..\..\ppuview.h"
 
 
 #define EO_BGRUN          1
@@ -211,7 +211,7 @@ void FCEUD_PrintError(char *s)
 
 void ShowAboutBox(void)
 {
- sprintf(TempArray,"FCE Ultra-debug "VERSION_STRING"\n\nhttp://fceultra.sourceforge.net/\t\nhttp://dragoneye.cg-games.net/\n\n"__TIME__"\n"__DATE__"\n""gcc "__VERSION__);
+ sprintf(TempArray,"FCE Ultra-debug "VERSION_STRING"\n\nhttp://fceultra.sourceforge.net/\t\nhttp://www.dragoneyestudios.net/\n\n"__TIME__"\n"__DATE__"\n""gcc "__VERSION__);
  MessageBox(hAppWnd,TempArray,"About FCE Ultra-debug",MB_OK|MB_ICONINFORMATION);
 }
 
@@ -329,11 +329,13 @@ int main(int argc,char *argv[])
   return(0);
 }
 
+extern void FCEUD_UpdateInput(void);
+
 void FCEUD_Update(uint8 *XBuf, int32 *Buffer, int Count)
 {
  FCEUD_BlitScreen(XBuf);
- if(Count)
-  FCEUD_WriteSoundData(Buffer,Count);
+ if(Count) FCEUD_WriteSoundData(Buffer,Count);
  FCEUD_UpdateInput();
+ PPUViewDoBlit();
 }
 

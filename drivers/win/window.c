@@ -348,6 +348,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                   case 201:DriverInterface(DES_POWER,0);break;
                   case 202:ConfigCheats(hWnd);break;
                   case 203:DoDebug(0);break;
+                  case 204:DoPPUView();break;
 
                   case 100:if (userpause < 2) {
                             StopSound();
@@ -358,6 +359,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                   case 101:if(GI)
                            {
 							KillDebugger();
+							KillPPUView();
                             FCEUI_CloseGame();
                             GI=0;
                            }
@@ -417,12 +419,7 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                goto proco;
 
     case WM_KEYDOWN:
-    	if (wParam==VK_F1) {
-			DoDebug(0);
-			break;
-		}
-
-        if(GI)
+              if(GI)
 	      {
 	       /* Only disable command keys if a game is loaded(and the other
 		  conditions are right, of course). */
@@ -455,8 +452,12 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                 switch( wParam )
                 {
                   case VK_F11:DriverInterface(DES_POWER,0);break;
-                  case VK_F12:
-                  case VK_ESCAPE:DoFCEUExit();break;
+                  case VK_F12:DoFCEUExit();break;
+                  case VK_F1:
+                    if (GetKeyState(VK_SHIFT) & 0x8000) ConfigCheats(hWnd);
+                    else if (GetKeyState(VK_CONTROL) & 0x8000) DoPPUView();
+                    else DoDebug(0);
+                    break;
                   case VK_F2:userpause^=1;break;
                   case VK_F3:ToggleHideMenu();break;
                   case VK_F4:       UpdateMenu();
@@ -730,6 +731,8 @@ static BOOL CALLBACK MiscConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
                  CheckDlgButton(hwndDlg,103,BST_CHECKED);
                 if(eoptions&EO_NOTHROTTLE)
                  CheckDlgButton(hwndDlg,101,BST_CHECKED);
+                if (CheatStyle) CheckDlgButton(hwndDlg,104,BST_CHECKED);
+                if (CheatWindow) EnableWindow(GetDlgItem(hwndDlg,104),FALSE);
                 break;
    case WM_CLOSE:
    case WM_QUIT: goto gornk;
@@ -755,6 +758,8 @@ static BOOL CALLBACK MiscConCallB(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARAM
                          eoptions|=EO_NOTHROTTLE;
                         else
                          eoptions&=~EO_NOTHROTTLE;
+                        if (IsDlgButtonChecked(hwndDlg,104) == BST_CHECKED) CheatStyle=1;
+                        else CheatStyle=0;
                         EndDialog(hwndDlg,0);
                         break;
                }

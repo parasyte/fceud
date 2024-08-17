@@ -349,7 +349,7 @@ int FCEUI_SetCheat(uint32 which, char *name, int32 a, int32 v, int s)
    {
     char *t;
 
-    if((t=realloc(next->name,strlen(name+1))))
+    if((t=realloc(next->name,strlen(name)+1)))
     {
      next->name=t;
      strcpy(next->name,name);
@@ -554,6 +554,76 @@ void FCEUI_CheatSearchEnd(int type, uint8 v1, uint8 v2)
    if(!(CheatComp[x]&CHEATC_NOSHOW))
    {
     if(CheatComp[x]!=CheatRPtrs[x>>10][x])
+    {
+
+    }
+    else
+     CheatComp[x]|=CHEATC_EXCLUDED;
+   }
+
+ }
+ else if(type==4)                          // new value = known
+ {
+  for(x=0x000;x<0x10000;x++)
+   if(!(CheatComp[x]&CHEATC_NOSHOW))
+   {
+    if(CheatRPtrs[x>>10][x]==v1)
+    {
+
+    }
+    else
+     CheatComp[x]|=CHEATC_EXCLUDED;
+   }
+
+ }
+ else if(type==5)                          // new value greater than
+ {
+  for(x=0x000;x<0x10000;x++)
+   if(!(CheatComp[x]&CHEATC_NOSHOW))
+   {
+    if(CheatComp[x]<CheatRPtrs[x>>10][x])
+    {
+
+    }
+    else
+     CheatComp[x]|=CHEATC_EXCLUDED;
+   }
+
+ }
+ else if(type==6)                          // new value less than
+ {
+  for(x=0x000;x<0x10000;x++)
+   if(!(CheatComp[x]&CHEATC_NOSHOW))
+   {
+    if(CheatComp[x]>CheatRPtrs[x>>10][x])
+    {
+
+    }
+    else
+     CheatComp[x]|=CHEATC_EXCLUDED;
+   }
+
+ }
+ else if(type==7)                          // new value greater than by known value
+ {
+  for(x=0x000;x<0x10000;x++)
+   if(!(CheatComp[x]&CHEATC_NOSHOW))
+   {
+    if((CheatRPtrs[x>>10][x]-CheatComp[x])==v2)
+    {
+
+    }
+    else
+     CheatComp[x]|=CHEATC_EXCLUDED;
+   }
+
+ }
+ else if(type==8)                          // new value less than by known value
+ {
+  for(x=0x000;x<0x10000;x++)
+   if(!(CheatComp[x]&CHEATC_NOSHOW))
+   {
+    if((CheatComp[x]-CheatRPtrs[x>>10][x])==v2)
     {
 
     }

@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <windows.h>
 #include <windowsx.h>
+#include <commctrl.h>
 
 #ifndef WIN32
 #define WIN32

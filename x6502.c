@@ -49,6 +49,7 @@ void FP_FASTAPASS(1) (*MapIRQHook)(int a);
 
 extern uint8 *XBuf;
 extern void FCEUD_BlitScreen(uint8 *XBuf);
+
 static INLINE void BreakHit() {
 	DoDebug(1);
 	userpause = 2;
@@ -81,13 +82,12 @@ static INLINE void breakpoint() {
 		BreakHit();
 		return;
 	}
-	if (watchpoint[64].address == _PC) {
+	if ((watchpoint[64].address == _PC) && (watchpoint[64].flags)) {
 		watchpoint[64].address = 0;
 		watchpoint[64].flags = 0;
 		BreakHit();
 		return;
 	}
-	if (numWPs == 0) return;
 
 
 	for (i = 1; i < opsize[opcode[0]]; i++) opcode[i] = GetMem(_PC+i);
@@ -415,8 +415,8 @@ uint16 indirectY(a) {
    redundant) on the variable "x".
 */
 
-#define RMW_A(op)   {uint8 x=_A; op; _A=x; break; } /* Meh... */
-#define RMW_AB(op)  {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
+#define RMW_A(op) {uint8 x=_A; op; _A=x; break; } /* Meh... */
+#define RMW_AB(op) {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
 #define RMW_ABI(reg,op) {unsigned int A; uint8 x; GetABIWR(A,reg); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
 #define RMW_ABX(op)	RMW_ABI(_X,op)
 #define RMW_ABY(op)	RMW_ABI(_Y,op)
@@ -540,31 +540,31 @@ void X6502_Power(void)
 
 void X6502_Run(int32 cycles)
 {
-	if(PAL)
-	 cycles*=15;          // 15*4=60
-	else
-	 cycles*=16;          // 16*4=64
+	if (PAL) cycles*=15;	// 15*4=60
+	else cycles*=16;		// 16*4=64
 
 	_count+=cycles;
 
-	while(_count>0)
-	{
+	while (_count>0) {
 	 int32 temp;
 	 uint8 b1;
 
-	 if(_IRQlow)
-	 {
-	  if(_IRQlow&FCEU_IQNMI)
-	   TriggerNMIReal();
-	  else
-	   TriggerIRQReal();
+		if (_IRQlow) {
+			if (_IRQlow&FCEU_IQNMI) TriggerNMIReal();
+			else TriggerIRQReal();
 
 	  _IRQlow&=~(FCEU_IQTEMP|FCEU_IQNMI);
-	  if(_count<=0) {_PI=_P;return;} /* Should increase accuracy without a */
- 	                                   /* major speed hit. */
+			if (_count<=0) {
+				_PI=_P;
+				return;
+			} // Should increase accuracy without a major speed hit.
 	 }
+
+		//will probably cause a major speed decrease on low-end systems
+		if (numWPs | step | stepout | watchpoint[64].flags) breakpoint();
+
 	 _PI=_P;
-	 b1=RdMem(_PC);
+		b1=RdMem(_PC++);
 	 ADDCYC(CycTable[b1]);
 	 temp=_tcount;
 	 _tcount=0;
@@ -573,21 +573,17 @@ void X6502_Run(int32 cycles)
 	 temp*=48;
 
 	 fhcnt-=temp;
-	 if(fhcnt<=0)
-	 {
+		if (fhcnt<=0) {
 	  FrameSoundUpdate();
 	  fhcnt+=fhinc;
 	 }
 
 	
-	 if(PCMIRQCount>0)
-	 {
+		if (PCMIRQCount>0) {
 	  PCMIRQCount-=temp;
-	  if(PCMIRQCount<=0)
-	  {
+			if (PCMIRQCount<=0) {
 	   vdis=1;
-	   if((PSG[0x10]&0x80) && !(PSG[0x10]&0x40))
-	   {
+				if ((PSG[0x10]&0x80) && !(PSG[0x10]&0x40)) {
 	    extern uint8 SIRQStat;
 	    SIRQStat|=0x80;
 	    X6502_IRQBegin(FCEU_IQDPCM);
@@ -598,13 +594,9 @@ void X6502_Run(int32 cycles)
 	 //_PC++;
 	 //printf("$%02x\n",b1);
 
-	 if (numWPs || step || stepout)
-	 	breakpoint(); //will probably cause a major speed decrease on low-end systems
+		switch (b1) {
+          #include "ops.h"
+         } 
 
-	 _PC++;
-	 switch(b1) {
-	 	#include "ops.h"
-	 }
-
-  }
+	}
 }
