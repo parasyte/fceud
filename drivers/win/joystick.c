@@ -25,7 +25,7 @@
 #include "joystick.h"
 
 
-HRESULT  ddrval;
+extern HRESULT  ddrval;
 
 static GUID joyGUID[64];
 

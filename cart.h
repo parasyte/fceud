@@ -43,7 +43,7 @@ void FASTAPASS(2) setchr8r(int r, unsigned int V);
 void FASTAPASS(2) setchr1(unsigned int A, unsigned int V);
 void FASTAPASS(2) setchr2(unsigned int A, unsigned int V);
 void FASTAPASS(2) setchr4(unsigned int A, unsigned int V);
-void FASTAPASS(2) setchr8(unsigned int V);
+void FASTAPASS(1) setchr8(unsigned int V);
 
 void FASTAPASS(2) setvram4(uint32 A, uint8 *p);
 void FASTAPASS(1) setvram8(uint8 *p);

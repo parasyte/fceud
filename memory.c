@@ -19,6 +19,7 @@
  */
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "types.h"
 #include "version.h"
@@ -42,26 +43,5 @@ void FCEU_free(void *ptr)		// Might do something with this and FCEU_malloc later
 
 void FASTAPASS(3) FCEU_memmove(void *d, void *s, uint32 l)
 {
- uint32 x;
- int t;
-
- /* Type really doesn't matter. */
- t=(int)d;
- t|=(int)s;
- t|=(int)l;
-
- if(t&3)          // Not 4-byte aligned and/or length is not a multiple of 4.
-  for(x=l;x;x--)        // This could be optimized further, though(more tests could be performed).
-  {
-   *(uint8*)d=*(uint8 *)s;
-   ((uint8 *)d)++;
-   ((uint8 *)s)++;
-  }
- else
-  for(x=l>>2;x;x--)
-  {
-   *(uint32*)d=*(uint32*)s;
-   ((uint32 *)d)++;
-   ((uint32 *)s)++;
-  }
+ memmove(d, s, l);
 }

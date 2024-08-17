@@ -1,6 +1,6 @@
 CC	= gcc
 TFLAGS  = -mcpu=i686 -O2 -Izlib -fomit-frame-pointer -DNOSTDOUT -DC80x86 -DLSB_FIRST -DWINDOWS -DNETWORK -DPSS_STYLE=2 -DZLIB
-RM	= del
+RM	= rm -f
 B	= drivers/win/
 all:		fceu
 

@@ -28,7 +28,7 @@
 #include "keyscan.h"
 
 
-HRESULT  ddrval;
+extern HRESULT  ddrval;
 
 static LPDIRECTINPUTDEVICE7 lpdid=0;
 static int porttemp;

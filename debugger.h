@@ -16,7 +16,7 @@ typedef struct {
 	uint8 flags;
 } watchpointinfo;
 
-watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step over
+extern watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step over
 
 extern uint8 *vnapage[4],*VPage[8];
 extern uint8 PPU[4],PALRAM[0x20],SPRAM[0x100],VRAMBuffer,PPUGenLatch,XOffset;
@@ -24,8 +24,8 @@ extern uint32 RefreshAddr;
 extern volatile int userpause;
 extern int scanline; //current scanline! :D
 
-int step,stepout,jsrcount;
-int childwnd,numWPs;
+extern int step,stepout,jsrcount;
+extern int childwnd,numWPs;
 
 void DoDebug(uint8 halt);
 void KillDebugger();

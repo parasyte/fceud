@@ -52,10 +52,10 @@ extern void (*MapperReset)(void);
 #define mapbyte2       (mapbyte1+8)
 #define mapbyte3       (mapbyte2+8)
 #define mapbyte4       (mapbyte3+8)
-uint16 iNESCHRBankList[8];
-int32 iNESIRQLatch,iNESIRQCount;
-uint8 iNESMirroring;
-uint8 iNESIRQa;
+extern uint16 iNESCHRBankList[8];
+extern int32 iNESIRQLatch,iNESIRQCount;
+extern uint8 iNESMirroring;
+extern uint8 iNESIRQa;
 
 #define IRQa iNESIRQa
 #define Mirroring iNESMirroring
@@ -84,7 +84,7 @@ void FASTAPASS(2) VROM_BANK4(uint32 A, uint32 V);
 void FASTAPASS(1) VROM_BANK8(uint32 V);
 void FASTAPASS(2) ROM_BANK8(uint32 A, uint32 V);
 void FASTAPASS(2) ROM_BANK16(uint32 A, uint32 V);
-void FASTAPASS(2) ROM_BANK32(uint32 V);
+void FASTAPASS(1) ROM_BANK32(uint32 V);
 
 extern uint8 vmask;
 extern uint32 vmask1;

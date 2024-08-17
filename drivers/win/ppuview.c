@@ -29,7 +29,7 @@ HWND hPPUView;
 int PPUViewPosX,PPUViewPosY;
 uint8 chrcache0[0x1000],chrcache1[0x1000]; //cache CHR, fixes a refresh problem when right-clicking
 uint8 *pattern0,*pattern1; //pattern table bitmap arrays
-uint8 *palette;
+extern uint8 *palette;
 static int pindex0=0,pindex1=0;
 int PPUViewScanline=0,PPUViewer=0;
 int PPUViewSkip=0,PPUViewRefresh;

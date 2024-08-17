@@ -31,10 +31,15 @@ int WP_edit=-1;
 int ChangeWait=0,ChangeWait2=0;
 uint8 debugger_open=0;
 HWND hDebug;
-HFONT hFont,hNewFont;
+static HFONT hFont,hNewFont;
 SCROLLINFO si;
 
 int iaPC;
+
+watchpointinfo watchpoint[65]; //64 watchpoints, + 1 reserved for step over
+
+int step,stepout,jsrcount;
+int childwnd,numWPs;
 
 
 uint8 GetMem(uint16 A) {

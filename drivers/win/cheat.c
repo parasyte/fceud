@@ -23,7 +23,9 @@
 
 int selcheat;
 int ChtPosX,ChtPosY;
-HFONT hFont,hNewFont;
+static HFONT hFont,hNewFont;
+
+int CheatWindow,CheatStyle;
 
 static int scrollindex;
 static int scrollnum;

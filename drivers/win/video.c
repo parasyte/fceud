@@ -162,10 +162,10 @@ static int GetBPP(void)
 
         if(ddpix.dwFlags&DDPF_RGB)
         {
-         bpp=ddpix.DUMMYUNIONNAMEN(1).dwRGBBitCount;
-         CBM[0]=ddpix.DUMMYUNIONNAMEN(2).dwRBitMask;
-         CBM[1]=ddpix.DUMMYUNIONNAMEN(3).dwGBitMask;
-         CBM[2]=ddpix.DUMMYUNIONNAMEN(4).dwBBitMask;
+         bpp=ddpix.dwRGBBitCount;
+         CBM[0]=ddpix.dwRBitMask;
+         CBM[1]=ddpix.dwGBitMask;
+         CBM[2]=ddpix.dwBBitMask;
         }
         else
         {
@@ -634,7 +634,7 @@ static void BlitScreenWindow(unsigned char *XBuf)
   if(ddrval==DDERR_SURFACELOST) RestoreDD(1);
   return;
  }
- pitch=ddsdback.DUMMYUNIONNAMEN(1).lPitch;
+ pitch=ddsdback.lPitch;
  ScreenLoc=ddsdback.lpSurface;
 
  if(veflags&1)
@@ -699,7 +699,7 @@ static void BlitScreenFull(uint8 *XBuf)
    return;
   }
   ScreenLoc=ddsdback.lpSurface;
-  pitch=ddsdback.DUMMYUNIONNAMEN(1).lPitch;
+  pitch=ddsdback.lPitch;
 
   srect.top=0;
   srect.left=0;
@@ -730,7 +730,7 @@ static void BlitScreenFull(uint8 *XBuf)
   }
 
   ScreenLoc=ddsd.lpSurface;
-  pitch=ddsd.DUMMYUNIONNAMEN(1).lPitch;
+  pitch=ddsd.lPitch;
  }
 
  if(veflags&1)
@@ -904,7 +904,7 @@ static void BlitScreenFull(uint8 *XBuf)
   {
    if(IDirectDrawSurface4_Lock(lpDDSVPrimary,NULL,&ddsd, 0, NULL)==DD_OK)
    {
-    memset(ddsd.lpSurface,0,ddsd.DUMMYUNIONNAMEN(1).lPitch*vmodes[vmod].y);
+    memset(ddsd.lpSurface,0,ddsd.lPitch*vmodes[vmod].y);
     IDirectDrawSurface4_Unlock(lpDDSVPrimary, NULL);
     veflags&=~2;
    }

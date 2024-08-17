@@ -389,7 +389,7 @@ INLINE void set_sl_rr(FM_OPL *OPL,int slot,int v)
 /* operator output calcrator */
 #define OP_OUT(slot,env,con)   slot->wavetable[((slot->Cnt+con)/(0x1000000/SIN_ENT))&(SIN_ENT-1)][env]
 /* ---------- calcrate one of channel ---------- */
-INLINE void OPL_CALC_CH( OPL_CH *CH )
+void OPL_CALC_CH( OPL_CH *CH )
 {
 	UINT32 env_out;
 	OPL_SLOT *SLOT;

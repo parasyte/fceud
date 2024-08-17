@@ -38,6 +38,11 @@
 #include "crc32.h"
 #include "cheat.h"
 
+uint16 iNESCHRBankList[8];
+int32 iNESIRQLatch,iNESIRQCount;
+uint8 iNESMirroring;
+uint8 iNESIRQa;
+
 static DECLFR(VSRead);
 
 static uint8 *trainerpoo=0;

@@ -67,8 +67,8 @@ uint8 MMC5HackSPMode;
 uint8 MMC5HackSPScroll;
 uint8 MMC5HackSPPage;
 
-uint8 *MMC5SPRVPage[8];
-uint8 *MMC5BGVPage[8];
+extern uint8 *MMC5SPRVPage[8];
+extern uint8 *MMC5BGVPage[8];
 
 
 uint8 VRAMBuffer,PPUGenLatch;
