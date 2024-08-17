@@ -238,19 +238,19 @@ static DECLFR(ARAMH)
         return RAM[A&0x7FF];
 }
 
-           
+
 static DECLFR(A2002)
 {
-                        uint8 ret;
-                        ret = PPU_status;
-                        vtoggle=0;
-                        PPU_status&=0x7F;
-                        return ret|(PPUGenLatch&0x1F);
+        uint8 ret;
+        ret = PPU_status;
+        vtoggle=0;
+        PPU_status&=0x7F;
+        return ret|(PPUGenLatch&0x1F); //change to 0x0F ?
 }
 
 static DECLFR(A200x)
 {
-                        return PPUGenLatch;
+        return PPUGenLatch;
 }
 
 static DECLFR(A2007)

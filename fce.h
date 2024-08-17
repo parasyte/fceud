@@ -19,7 +19,6 @@ void ResetMapping(void);
 void ResetNES(void);
 void PowerNES(void);
 
-
 extern uint64 timestampbase;
 extern uint32 MMC5HackVROMMask;
 extern uint8 *MMC5HackExNTARAMPtr;

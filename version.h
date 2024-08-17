@@ -1,5 +1,5 @@
 #define VERSION_NUMERIC 81
-#define VERSION_STRING ".81"
+#define VERSION_STRING "0.81.2"
 
 #if PSS_STYLE==2
 

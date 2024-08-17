@@ -19,11 +19,14 @@
  */
 
 #include <string.h>
+#include <stdio.h>
 
 #include "types.h"
 #include "x6502.h"
 #include "fce.h"
 #include "sound.h"
+
+#include "debugger.h"
 
 X6502 X;
 uint32 timestamp;
@@ -43,6 +46,97 @@ void FP_FASTAPASS(1) (*MapIRQHook)(int a);
 #define _IRQlow          X.IRQlow
 #define _jammed          X.jammed
 
+
+extern uint8 *XBuf;
+extern void FCEUD_BlitScreen(uint8 *XBuf);
+static INLINE void BreakHit() {
+	DoDebug(1);
+	userpause = 2;
+	FCEUD_BlitScreen(XBuf+8); //this looks odd, I know. but the pause routine is in here!!
+}
+
+//extern int step;
+//extern int stepout;
+//extern int jsrcount;
+static INLINE void breakpoint() {
+	int i;
+	uint16 A=0;
+	uint8 brk_type,opcode[3] = {0};
+
+	opcode[0] = GetMem(_PC);
+
+	if (stepout) {
+		if (opcode[0] == 0x20) jsrcount++;
+		else if (opcode[0] == 0x60) {
+			if (jsrcount) jsrcount--;
+			else {
+				stepout = 0;
+				step = 1;
+				return;
+			}
+		}
+	}
+	if (step) {
+		step = 0;
+		BreakHit();
+		return;
+	}
+	if (watchpoint[64].address == _PC) {
+		watchpoint[64].address = 0;
+		watchpoint[64].flags = 0;
+		BreakHit();
+		return;
+	}
+	if (numWPs == 0) return;
+
+
+	for (i = 1; i < opsize[opcode[0]]; i++) opcode[i] = GetMem(_PC+i);
+	brk_type = opbrktype[opcode[0]] | WP_X;
+	switch (optype[opcode[0]]) {
+		case 0: /*A = _PC;*/ break;
+		case 1:
+			A = (opcode[1]+_X) & 0xFF;
+			A = GetMem(A) | (GetMem(A+1))<<8;
+			break;
+		case 2: A = opcode[1]; break;
+		case 3: A = opcode[1] | opcode[2]<<8; break;
+		case 4: A = (GetMem(opcode[1]) | (GetMem(opcode[1]+1))<<8)+_Y; break;
+		case 5: A = opcode[1]+_X; break;
+		case 6: A = (opcode[1] | opcode[2]<<8)+_Y; break;
+		case 7: A = (opcode[1] | opcode[2]<<8)+_X; break;
+		case 8: A = opcode[1]+_Y; break;
+	}
+
+	for (i = 0; i < numWPs; i++) {
+		if (watchpoint[i].flags & BT_P) { //PPU Mem breaks
+			if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 7)) {
+				if (watchpoint[i].endaddress) {
+					if ((watchpoint[i].address <= RefreshAddr) && (watchpoint[i].endaddress >= RefreshAddr)) BreakHit();
+				}
+				else if (watchpoint[i].address == RefreshAddr) BreakHit();
+			}
+		}
+		else if (watchpoint[i].flags & BT_S) { //Sprite Mem breaks
+			if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type) && ((A >= 0x2000) && (A < 0x4000)) && ((A&7) == 4)) {
+				if (watchpoint[i].endaddress) {
+					if ((watchpoint[i].address <= PPU[3]) && (watchpoint[i].endaddress >= PPU[3])) BreakHit();
+				}
+				else if (watchpoint[i].address == PPU[3]) BreakHit();
+			}
+			else if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & WP_W) && (A == 0x4014)) BreakHit(); //Sprite DMA! :P
+		}
+		else { //CPU mem breaks
+			if ((watchpoint[i].flags & WP_E) && (watchpoint[i].flags & brk_type)) {
+				if (watchpoint[i].endaddress) {
+					if (((!(watchpoint[i].flags & WP_X)) && (watchpoint[i].address <= A) && (watchpoint[i].endaddress >= A)) ||
+						((watchpoint[i].flags & WP_X) && (watchpoint[i].address <= _PC) && (watchpoint[i].endaddress >= _PC))) BreakHit();
+				}
+				else if (((!(watchpoint[i].flags & WP_X)) && (watchpoint[i].address == A)) ||
+						((watchpoint[i].flags & WP_X) && (watchpoint[i].address == _PC))) BreakHit();
+			}
+		}
+	}
+}
 
 static INLINE uint8 RdMem(unsigned int A)
 {
@@ -288,13 +382,41 @@ static uint8 ZNTable[256] = {
  RdMem((target&0x00FF)|(rt&0xFF00));	\
 }
 
+
+// addressesing mode macros for breakpoint code
+
+/*
+//uint16 relative() {
+//	int a;
+//	if ((a=GetMem(_PC))&0x80) a = addr-((a-1)^0xFF);
+//	else a+=addr;
+//	return a;
+//}
+uint16 absolute() {
+	return GetMem(_PC) | GetMem(_PC+1)<<8;
+}
+unit16 zpIndex(uint8 i) {
+	return GetMem(_PC)+i;
+}
+uint16 indirectX(a) {
+	int a = (GetMem(_PC)+X.X)&0xFF;
+	a = GetMem(a) | (GetMem(a+1))<<8;
+}
+uint16 indirectY(a) {
+	int b = GetMem(_PC);
+	a = GetMem(b) | (GetMem(b+1))<<8;
+	a += X.Y;
+}
+*/
+
+
 /* Now come the macros to wrap up all of the above stuff addressing mode functions
    and operation macros.  Note that operation macros will always operate(redundant
    redundant) on the variable "x".
 */
 
-#define RMW_A(op) {uint8 x=_A; op; _A=x; break; } /* Meh... */
-#define RMW_AB(op) {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
+#define RMW_A(op)   {uint8 x=_A; op; _A=x; break; } /* Meh... */
+#define RMW_AB(op)  {unsigned int A; uint8 x; GetAB(A); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
 #define RMW_ABI(reg,op) {unsigned int A; uint8 x; GetABIWR(A,reg); x=RdMem(A); WrMem(A,x); op; WrMem(A,x); break; }
 #define RMW_ABX(op)	RMW_ABI(_X,op)
 #define RMW_ABY(op)	RMW_ABI(_Y,op)
@@ -475,10 +597,14 @@ void X6502_Run(int32 cycles)
 	  //printf("$%04x:$%02x\n",_PC,b1);
 	 //_PC++;
 	 //printf("$%02x\n",b1);
+
+	 if (numWPs || step || stepout)
+	 	breakpoint(); //will probably cause a major speed decrease on low-end systems
+
 	 _PC++;
-         switch(b1)
-         {
-          #include "ops.h"
-         } 
-	}
+	 switch(b1) {
+	 	#include "ops.h"
+	 }
+
+  }
 }

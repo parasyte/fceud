@@ -122,7 +122,7 @@ static CFGSTRUCT fceuconfig[]={
 static void SaveConfig(void)
 {	
 	char tdir[2048];
-	sprintf(tdir,"%s"PSS"fceu.cfg",BaseDirectory);
+	sprintf(tdir,"%s"PSS"fceud.cfg",BaseDirectory);
         DriverInterface(DES_GETNTSCTINT,&ntsctint);
         DriverInterface(DES_GETNTSCHUE,&ntschue);
         SaveFCEUConfig(tdir,fceuconfig);
@@ -131,7 +131,7 @@ static void SaveConfig(void)
 static void LoadConfig(void)
 {
 	char tdir[2048];
-        sprintf(tdir,"%s"PSS"fceu.cfg",BaseDirectory);
+        sprintf(tdir,"%s"PSS"fceud.cfg",BaseDirectory);
         LoadFCEUConfig(tdir,fceuconfig);
         if(ntsctint>=0) DriverInterface(DES_SETNTSCTINT,&ntsctint);
         if(ntschue>=0) DriverInterface(DES_SETNTSCHUE,&ntschue);

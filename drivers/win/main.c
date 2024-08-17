@@ -34,6 +34,7 @@
 #include "joystick.h"
 #include "keyboard.h"
 #include "cheat.h"
+#include "..\..\debugger.h"
 
 
 #define EO_BGRUN          1
@@ -162,7 +163,7 @@ static int winsizemul=1;
 static int winwidth,winheight;
 
 static volatile int nofocus=0;
-static volatile int userpause=0;
+volatile int userpause=0;
 
 #define SO_FORCE8BIT  1
 #define SO_SECONDARY  2
@@ -210,12 +211,13 @@ void FCEUD_PrintError(char *s)
 
 void ShowAboutBox(void)
 {
- sprintf(TempArray,"FCE Ultra "VERSION_STRING"\n\nhttp://fceultra.sourceforge.net\n\n"__TIME__"\n"__DATE__"\n""gcc "__VERSION__);
- MessageBox(hAppWnd,TempArray,"About FCE Ultra",MB_OK);
+ sprintf(TempArray,"FCE Ultra-debug "VERSION_STRING"\n\nhttp://fceultra.sourceforge.net/\t\nhttp://dragoneye.cg-games.net/\n\n"__TIME__"\n"__DATE__"\n""gcc "__VERSION__);
+ MessageBox(hAppWnd,TempArray,"About FCE Ultra-debug",MB_OK|MB_ICONINFORMATION);
 }
 
 void DoFCEUExit(void)
 {
+ KillDebugger();
  exiting=1;
  if(GI)
  {
@@ -251,7 +253,7 @@ int DriverInitialize(void)
 
 static void DriverKill(void)
 { 
- sprintf(TempArray,"%s/fceu.cfg",BaseDirectory);
+ sprintf(TempArray,"%s/fceud.cfg",BaseDirectory);
  SaveConfig(TempArray);
  DestroyInput();
  ResetVideo();
@@ -272,14 +274,13 @@ int main(int argc,char *argv[])
 
   GetBaseDirectory();
 
-  sprintf(TempArray,"%s\\fceu.cfg",BaseDirectory);
+  sprintf(TempArray,"%s\\fceud.cfg",BaseDirectory);
   LoadConfig(TempArray);
   FixGIGO();      /* Since a game doesn't have to be
                      loaded before the GUI can be used, make
                      sure the temporary input type variables
                      are set.
                   */
-
 
   CreateDirs();
   SetDirs();

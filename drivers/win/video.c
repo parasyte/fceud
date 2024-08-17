@@ -437,13 +437,13 @@ void FCEUD_BlitScreen(uint8 *XBuf)
   if(!windowedfailed)
    BlitScreenWindow(XBuf);
  }
- if(userpause)
- {
-  StopSound();
-  Sleep(50);
-  BlockingCheck();
-  goto doagain;
- }
+
+	if (userpause) {
+		StopSound();
+		Sleep(50);
+		BlockingCheck();
+		goto doagain;
+	}
 }
 
 static INLINE void BlitVidHi(uint8 *src, uint8 *dest, /*int xr,*/ int yr, int pitch)

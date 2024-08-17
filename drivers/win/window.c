@@ -18,6 +18,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+
+int WinPosX=150,WinPosY=150;
+
 static void ConfigMisc(void);
 static void ConfigPalette(void);
 static void ConfigDirectories(void);
@@ -67,6 +70,7 @@ void UpdateMenu(void)
 
  for(x=0;x<2;x++)
   CheckMenuItem(fceumenu,polo2[x],*polo[x]?MF_CHECKED:MF_UNCHECKED);
+
  if(eoptions&EO_BGRUN)
   CheckMenuItem(fceumenu,301,MF_CHECKED);
  else
@@ -193,6 +197,7 @@ static void ALoad(char *nameo)
 {
   if((GI=FCEUI_LoadGame(nameo)))
   {
+   KillDebugger();
    FixFL();
    FixGIGO();
    SetMainWindowStuff();
@@ -213,7 +218,7 @@ void LoadNewGamey(HWND hParent)
  memset(&ofn,0,sizeof(ofn));
  ofn.lStructSize=sizeof(ofn);
  ofn.hInstance=fceu_hInstance;
- ofn.lpstrTitle="FCE Ultra Open File...";
+ ofn.lpstrTitle="FCE Ultra-debug Open File...";
  ofn.lpstrFilter=filter;
  nameo[0]=0;
  ofn.hwndOwner=hParent;
@@ -265,7 +270,14 @@ static int vchanged=0;
 
 LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
 {
-  switch(msg) {   
+  RECT wrect;
+
+  if (childwnd) {
+	  if ((msg == WM_CLOSE) || (msg == WM_DESTROY) || (msg == WM_QUIT)) return 1;
+	  goto proco;
+  }
+
+  switch(msg) {
     case WM_LBUTTONDOWN:
     case WM_LBUTTONUP:
     case WM_RBUTTONDOWN:
@@ -305,7 +317,10 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                  wParam&=0xFFFF;
                  if(wParam>=600 && wParam<=609)
                  {
-                  if(rfiles[wParam-600]) ALoad(rfiles[wParam-600]);
+                  if(rfiles[wParam-600]) {
+					  if (userpause < 2) ALoad(rfiles[wParam-600]);
+					  else MessageBox(hWnd,"Cannot open a new ROM while debugger is snapped.\nPlease click \"Run\" in the debugger window and try again.","File Open Error",MB_OK);
+				  }
                  }
                  switch(wParam)
                  {
@@ -332,13 +347,18 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                   case 200:DriverInterface(DES_RESET,0);break;
                   case 201:DriverInterface(DES_POWER,0);break;
                   case 202:ConfigCheats(hWnd);break;
+                  case 203:DoDebug(0);break;
 
-                  case 100:StopSound();
-                           LoadNewGamey(hWnd);
+                  case 100:if (userpause < 2) {
+                            StopSound();
+                            LoadNewGamey(hWnd);
+                           }
+                           else MessageBox(hWnd,"Cannot open a new ROM while debugger is snapped.\nPlease click \"Run\" in the debugger window and try again.","File Open Error",MB_OK);
                            break;
                   case 101:if(GI)
                            {
-                            FCEUI_CloseGame();                            
+							KillDebugger();
+                            FCEUI_CloseGame();
                             GI=0;
                            }
                            break;
@@ -397,10 +417,16 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                goto proco;
 
     case WM_KEYDOWN:
-              if(GI)
+    	if (wParam==VK_F1) {
+			DoDebug(0);
+			break;
+		}
+
+        if(GI)
 	      {
 	       /* Only disable command keys if a game is loaded(and the other
 		  conditions are right, of course). */
+
                if(InputTypeFC==SIFC_FKB)
 	       {
 		if(wParam==VK_SCROLL)
@@ -429,7 +455,8 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                 switch( wParam )
                 {
                   case VK_F11:DriverInterface(DES_POWER,0);break;
-                  case VK_F12:DoFCEUExit();break;
+                  case VK_F12:
+                  case VK_ESCAPE:DoFCEUExit();break;
                   case VK_F2:userpause^=1;break;
                   case VK_F3:ToggleHideMenu();break;
                   case VK_F4:       UpdateMenu();
@@ -441,6 +468,11 @@ LRESULT FAR PASCAL AppWndProc(HWND hWnd,UINT msg,WPARAM wParam,LPARAM lParam)
                 }
                 goto proco;
 
+	case WM_MOVE:
+		GetWindowRect(hAppWnd,&wrect);
+		WinPosX = wrect.left;
+		WinPosY = wrect.top;
+		break;
 
     case WM_NCRBUTTONDOWN:
     case WM_NCMBUTTONDOWN:StopSound();goto proco;
@@ -532,10 +564,10 @@ int CreateMainWindow(void)
   recentmenu=CreateMenu();
   UpdateRMenu();
 
-  hAppWnd = CreateWindowEx(0,"FCEULTRA","FCE Ultra",
+  hAppWnd = CreateWindowEx(0,"FCEULTRA","FCE Ultra-debug",
                         WS_OVERLAPPEDWINDOW|WS_CLIPSIBLINGS,  /* Style */
-                        CW_USEDEFAULT,CW_USEDEFAULT,256,240,  /* X,Y ; Width, Height */
-                        NULL,fceumenu,fceu_hInstance,NULL );  
+                        /*CW_USEDEFAULT,CW_USEDEFAULT*/ WinPosX,WinPosY,256,240,  /* X,Y ; Width, Height */
+                        NULL,fceumenu,fceu_hInstance,NULL );
   DragAcceptFiles(hAppWnd, 1);
   SetMainWindowStuff();
   return 1;
@@ -566,6 +598,7 @@ int SetMainWindowStuff(void)
 
   if(eoptions&EO_USERFORCE)
   {
+	  //MessageBox(hAppWnd, "This never hits, ha!", "bleh", MB_OK);
    SetWindowPos(hAppWnd,HWND_TOP,tmp.left,tmp.top,0,0,SWP_NOSIZE|SWP_SHOWWINDOW);
    winwidth=tmp.right-tmp.left;
    winheight=tmp.bottom-tmp.top;
@@ -619,7 +652,7 @@ void LoadPaletteFile(void)
  memset(&ofn,0,sizeof(ofn));
  ofn.lStructSize=sizeof(ofn);
  ofn.hInstance=fceu_hInstance;
- ofn.lpstrTitle="FCE Ultra Open Palette File...";
+ ofn.lpstrTitle="FCE Ultra Open-debug Palette File...";
  ofn.lpstrFilter=filter;
  nameo[0]=0;
  ofn.lpstrFile=nameo;

@@ -27,6 +27,9 @@
 /****************************************************************/
 #include "../common/config.h"
 
+
+extern int DbgPosX,DbgPosY;
+
 static CFGSTRUCT fceuconfig[]={
 
         ACS(rfiles[0]),
@@ -102,6 +105,12 @@ static CFGSTRUCT fceuconfig[]={
         AC(fssync),
         AC(NoFourScore),
         ACA(fkbmap),
+
+        AC(WinPosX),
+        AC(WinPosY),
+        AC(DbgPosX),
+        AC(DbgPosY),
+
         ENDCFGSTRUCT
 };
 
